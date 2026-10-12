@@ -24,29 +24,42 @@ function renderProducts() {
     card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>`;
     const btn = document.createElement("button");
     btn.textContent = "В корзину";
-    btn.addEventListener("click", addToCart);
+    btn.addEventListener("click", () => addToCart(p.id));
     card.appendChild(btn);
     productsEl.appendChild(card);
   });
 }
 
 function addToCart(id) {
-  const product = products.find((p) => p.id === id);
-  if (!product) {
-    return;
+  const productInCart = cart.find((p) => p.id === id);
+
+  if (productInCart) {
+    productInCart.qty++;
+  } else {
+    const product = products.find((p) => p.id === id);
+    if (!product) {
+      return;
+    }
+
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      qty: 1,
+    });
   }
-  cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
   renderCart();
 }
 
 function increaseQty(id) {
   const item = cart.find((i) => i.id === id);
-  item.qty;
+  item.qty++;
   renderCart();
 }
 
 function decreaseQty(id) {
   const item = cart.find((i) => i.id === id);
+  if (item.qty === 1) return;
   item.qty--;
   renderCart();
 }
@@ -57,44 +70,57 @@ function removeItem(id) {
 }
 
 function applyPromo() {
-  if ((promoInput.value = "SALE10")) {
+  if (promoInput.value.trim() === "SALE10") {
     discount = 0.1;
   }
   renderCart();
 }
 
 function clearCart() {
-  cart.splice(0, 1);
+  cart = [];
   renderCart();
 }
 
 function renderCart() {
   cartItemsEl.innerHTML = "";
-  let total = "";
-  cart.forEach((item) => {
-    const lineTotal = item.price;
-    const li = document.createElement("li");
-    li.className = "cart-item";
-    li.innerHTML = `<span>${item.name}</span>
+  let totalPrice = 0;
+  let totalQty = 0;
+
+  if (cart.length) {
+    cart.forEach((item) => {
+      const lineTotal = item.price;
+      const li = document.createElement("li");
+      li.className = "cart-item";
+      li.innerHTML = `<span>${item.name}</span>
       <button class="qty-btn" data-act="dec">−</button>
       <span class="qty">${item.qty}</span>
       <button class="qty-btn" data-act="inc">+</button>
-      <span class="line">${lineTotal} ₽</span>
+      <span class="line">${lineTotal * item.qty} ₽</span>
       <button class="remove">✕</button>`;
-    li.querySelector('[data-act="inc"]').addEventListener("click", () => increaseQty(item.id));
-    li.querySelector('[data-act="dec"]').addEventListener("click", () => decreaseQty(item.id));
-    li.querySelector(".remove").addEventListener("click", () => removeItem(item.id));
-    cartItemsEl.appendChild(li);
-    total += item.price * item.qty;
-  });
+      li.querySelector('[data-act="inc"]').addEventListener("click", () =>
+        increaseQty(item.id),
+      );
+      li.querySelector('[data-act="dec"]').addEventListener("click", () =>
+        decreaseQty(item.id),
+      );
+      li.querySelector(".remove").addEventListener("click", () =>
+        removeItem(item.id),
+      );
+      cartItemsEl.appendChild(li);
+      totalPrice += item.price * item.qty;
+      totalQty += item.qty;
+    });
 
-  if (discount) {
-    total = total - total * discount;
+    if (discount) {
+      totalPrice = totalPrice - totalPrice * discount;
+    }
+    emptyMsg.hidden = true;
+  } else {
+    emptyMsg.hidden = false;
   }
 
-  badgeEl.textContent = cart.length;
-  totalEl.textContent = total;
-  emptyMsg.hidden = true;
+  badgeEl.textContent = totalQty;
+  totalEl.textContent = totalPrice;
 }
 
 promoBtn.addEventListener("click", applyPromo);
