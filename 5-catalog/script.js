@@ -23,13 +23,13 @@ function getFiltered() {
   const sort = sortSelect.value;
 
   if (search) {
-    result = result.filter((p) =>
+    result = products.filter((p) =>
       p.name.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
   if (category !== "all") {
-    result = products.filter((p) => p.category === category);
+    result = result.filter((p) => p.category === category);
   }
 
   if (sort === "asc") {
