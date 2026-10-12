@@ -92,7 +92,7 @@ function renderCart() {
       <button class="qty-btn" data-act="dec">−</button>
       <span class="qty">${item.qty}</span>
       <button class="qty-btn" data-act="inc">+</button>
-      <span class="line">${lineTotal} ₽</span>
+      <span class="line">${lineTotal * item.qty} ₽</span>
       <button class="remove">✕</button>`;
     li.querySelector('[data-act="inc"]').addEventListener("click", () =>
       increaseQty(item.id),
